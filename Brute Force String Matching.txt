@@ -1,0 +1,132 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+int count = 0;
+
+/* Brute Force String Matching */
+int stringmatching(char *text, char *pattern, int n, int m) {
+    count = 0;
+
+    for (int i = 0; i <= n - m; i++) {
+        int j = 0;
+
+        while (j < m) {
+            count++;
+            if (pattern[j] != text[i + j])
+                break;
+            j++;
+        }
+
+        if (j == m)
+            return count; // pattern found
+    }
+    return count; // pattern not found
+}
+
+/* ================= TESTER ================= */
+void tester() {
+    int n, m;
+    char text[1000], pattern[1000];
+
+    printf("\n===== TESTER =====\n");
+
+    printf("Enter pattern length: ");
+    scanf("%d", &m);
+
+    printf("Enter pattern: ");
+    getchar();
+    fgets(pattern, sizeof(pattern), stdin);
+    pattern[strcspn(pattern, "\n")] = '\0';
+
+    printf("Enter text length: ");
+    scanf("%d", &n);
+
+    printf("Enter text: ");
+    getchar();
+    fgets(text, sizeof(text), stdin);
+    text[strcspn(text, "\n")] = '\0';
+
+    int comparisons = stringmatching(text, pattern, n, m);
+
+    if (comparisons > 0)
+        printf("Comparisons: %d\n", comparisons);
+}
+
+/* ================= PLOTTER ================= */
+void plotter() {
+    FILE *best = fopen("string_best.txt", "w");
+    FILE *worst = fopen("string_worst.txt", "w");
+    FILE *avg = fopen("string_avg.txt", "w");
+
+    char *text = (char *)malloc(1000 * sizeof(char));
+    int n = 1000;
+
+    // Fill text with 'a'
+    for (int i = 0; i < n; i++)
+        text[i] = 'a';
+
+    int m = 10;
+
+    printf("\n===== PLOTTER RUNNING =====\n");
+
+    while (m <= 1000) {
+
+        char *pattern = (char *)malloc(m * sizeof(char));
+
+        /* BEST CASE */
+        for (int i = 0; i < m; i++)
+            pattern[i] = 'a';
+
+        stringmatching(text, pattern, n, m);
+        fprintf(best, "%d\t%d\n", m, count);
+
+        /* WORST CASE */
+        for (int i = 0; i < m; i++)
+            pattern[i] = 'a';
+        pattern[m - 1] = 'b';
+
+        stringmatching(text, pattern, n, m);
+        fprintf(worst, "%d\t%d\n", m, count);
+
+        /* AVERAGE CASE */
+        for (int i = 0; i < m; i++)
+            pattern[i] = 'a' + rand() % 3;
+
+        stringmatching(text, pattern, n, m);
+        fprintf(avg, "%d\t%d\n", m, count);
+
+        free(pattern);
+
+        if (m < 100)
+            m += 10;
+        else
+            m += 100;
+    }
+
+    fclose(best);
+    fclose(worst);
+    fclose(avg);
+    free(text);
+
+    printf("Data files generated:\n");
+    printf("string_best.txt\nstring_worst.txt\nstring_avg.txt\n");
+}
+
+/* ================= MAIN ================= */
+int main() {
+    int choice;
+
+    printf("\n1. Tester\n2. Plotter\nEnter choice: ");
+    scanf("%d", &choice);
+
+    if (choice == 1)
+        tester();
+    else if (choice == 2)
+        plotter();
+    else
+        printf("Invalid choice\n");
+
+    return 0;
+}
